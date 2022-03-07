@@ -1,0 +1,1 @@
+  cudaMemcpy(a, d_a, SIZE*sizeof(double), cudaMemcpyDeviceToHost); 
