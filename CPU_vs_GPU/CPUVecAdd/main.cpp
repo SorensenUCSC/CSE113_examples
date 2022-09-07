@@ -5,8 +5,8 @@
 using namespace std::chrono;
 using namespace std;
 
-#define SIZE (1024*1024)
-#define OUTER (1024*2)
+#define SIZE (1024*1024*32)
+#define OUTER (128)
 
 void vec_add(double *a, double *b, double *c, int size, int tid, int num_threads) {
   int chunk = size / num_threads;

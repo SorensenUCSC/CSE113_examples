@@ -5,10 +5,10 @@
 using namespace std::chrono;
 using namespace std;
 
-#define SIZE (1024*1024)
-#define OUTER (16)
+#define SIZE (1024)
+#define OUTER (128)
 
-__global__ void vector_add(double * d_a, double * d_b, double * d_c, int size) {
+__global__ void vector_add(float * d_a, float * d_b, float * d_c, int size) {
   int chunk = size / blockDim.x;
   int start = chunk * threadIdx.x;
   int end = start + chunk;
@@ -21,25 +21,25 @@ __global__ void vector_add(double * d_a, double * d_b, double * d_c, int size) {
 
 int main() {
 
-  double *a = new double[SIZE];
-  double *b = new double[SIZE];
-  double *c = new double[SIZE];
+  float *a = new float[SIZE]; 
+  float *b = new float[SIZE];
+  float *c = new float[SIZE];
 
   for(int i = 0; i < SIZE; i++) {
-    a[i] = 0;
+    a[i] = 0.0f;
     b[i] = i;
-    c[i] = 1;
+    c[i] = 1.0f;
   }
 
-  double *d_a, *d_b, *d_c;
+  float *d_a, *d_b, *d_c;
   int e = 0;
-  e = cudaMalloc(&d_a, SIZE*sizeof(double));
-  e |= cudaMalloc(&d_b, SIZE*sizeof(double));
-  e |= cudaMalloc(&d_c, SIZE*sizeof(double));
+  e = cudaMalloc(&d_a, SIZE*sizeof(float));
+  e |= cudaMalloc(&d_b, SIZE*sizeof(float));
+  e |= cudaMalloc(&d_c, SIZE*sizeof(float));
 
-  e |= cudaMemcpy(d_a, a, SIZE*sizeof(double), cudaMemcpyHostToDevice);
-  e |= cudaMemcpy(d_b, b, SIZE*sizeof(double), cudaMemcpyHostToDevice);
-  e |= cudaMemcpy(d_c, c, SIZE*sizeof(double), cudaMemcpyHostToDevice);
+  e |= cudaMemcpy(d_a, a, SIZE*sizeof(float), cudaMemcpyHostToDevice);
+  e |= cudaMemcpy(d_b, b, SIZE*sizeof(float), cudaMemcpyHostToDevice);
+  e |= cudaMemcpy(d_c, c, SIZE*sizeof(float), cudaMemcpyHostToDevice);
 
   auto time_start = high_resolution_clock::now();
   vector_add<<<1,32>>>(d_a, d_b, d_c, SIZE);
@@ -51,10 +51,12 @@ int main() {
   
   cout << "timings: " << time_seconds << endl;
 
-  cudaMemcpy(a, d_a, SIZE*sizeof(double), cudaMemcpyDeviceToHost); 
+  e |= cudaMemcpy(a, d_a, SIZE*sizeof(float), cudaMemcpyDeviceToHost);
+
+  assert(e == 0);
       
   for (int i = 0; i < SIZE; i++) {
-    assert(a[i] == (i + 1));    
+    assert(a[i] == (float(i) + 1.0f));    
   }  
 
   return 0;

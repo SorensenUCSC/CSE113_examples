@@ -10,11 +10,52 @@ using namespace std;
 
 __global__ void vector_add(float * d_a, float * d_b, float * d_c, int size) {
   int global_id = (blockIdx.x * blockDim.x) + threadIdx.x;
-  int i = global_id;
-  for (int j = 0; j < OUTER; j++) {
-    d_a[i] = d_b[i] + d_c[i];
+  if (global_id % 4 == 0) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] + d_c[global_id];
+    }
+  }
+  else if (global_id % 4 == 1) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] * d_c[global_id];
+    }    
+  }
+  else if (global_id % 4 == 2) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] / d_c[global_id];
+    }
+  }
+  else if (global_id % 4 == 3) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] - d_c[global_id];
+    }    
   }
 }
+
+__global__ void vector_add_chunked(float * d_a, float * d_b, float * d_c, int size) {
+  int global_id = (blockIdx.x * blockDim.x) + threadIdx.x;
+  if (global_id < (size/4)*1) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] + d_c[global_id];
+    }
+  }
+  else if (global_id < (size/4)*2) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] * d_c[global_id];
+    }    
+  }
+  else if (global_id < (size/4)*3) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] / d_c[global_id];
+    }
+  }
+  else if (global_id < (size/4)*4) {
+    for (int j = 0; j < OUTER; j++) {
+      d_a[global_id] = d_b[global_id] - d_c[global_id];
+    }    
+  }
+}
+
 
 
 int main() {
@@ -55,14 +96,10 @@ int main() {
   cout << "timings: " << time_seconds << endl;
 
   e |= cudaMemcpy(a, d_a, SIZE*sizeof(float), cudaMemcpyDeviceToHost); 
-
-  assert(e == 0);
+      
   for (int i = 0; i < SIZE; i++) {
     assert(a[i] == (float(i) + 1.0f));    
   }  
 
   return 0;
 }
-
-
-  
