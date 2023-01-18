@@ -1,9 +1,12 @@
 #include "stdlib.h"
+#include <chrono>
+#include <iostream>
 #include <thread>
 using namespace std;
+using namespace std::chrono;
 
-#define NUM_ELEMENTS 8
-#define ITERATIONS 1024 * 1024 * 256
+#include "common.h"
+
 #define CACHE_LINE_INT 16
 
 void repeat_increment(volatile int *a) {
@@ -21,7 +24,8 @@ int main() {
   for (int i = 0; i < NUM_ELEMENTS; i++) {
     ar[i*CACHE_LINE_INT] = 0;
   }
- 
+
+  auto start = high_resolution_clock::now();
   for (int i = 0; i < NUM_ELEMENTS; i++) {
     thread_ar[i] = thread(repeat_increment, ar+(i*CACHE_LINE_INT));
   }
@@ -29,4 +33,12 @@ int main() {
   for (int i = 0; i < NUM_ELEMENTS; i++) {
     thread_ar[i].join();
   }
+
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<nanoseconds>(stop - start);
+  double seconds = duration.count()/1000000000.0;
+  
+  cout << seconds << " s\n";
+
 }
+
