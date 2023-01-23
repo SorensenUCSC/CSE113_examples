@@ -7,7 +7,9 @@ using namespace std;
 volatile int tylers_account = 0;
 
 void ucsc_pays_tyler() {
-  tylers_account += 1;
+  for (int i = 0; i < HOURS; i++) {
+    tylers_account += 1;
+  }
 }
 
 void tyler_buys_coffee() {
@@ -18,11 +20,10 @@ void tyler_buys_coffee() {
 
 int main() {
 
-  thread t = thread(tyler_buys_coffee);
-  for (int i = 0; i < HOURS; i++) {
-    ucsc_pays_tyler();
-  }
-  t.join();
+  thread t0 = thread(tyler_buys_coffee);
+  thread t1 = thread(ucsc_pays_tyler);
+  t0.join();
+  t1.join();
 
   cout << "tyler's account balance: " << tylers_account << endl;
 
