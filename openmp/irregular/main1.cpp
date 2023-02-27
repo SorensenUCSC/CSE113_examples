@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
   auto start = std::chrono::high_resolution_clock::now();
 
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < SIZE; i++) {
     float base = result_parallel[i];
     for (int w = 0; w < mult[i]-1; w++) {
